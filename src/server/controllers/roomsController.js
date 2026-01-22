@@ -22,7 +22,7 @@ const roomController = {
 
       const io = req.app.get('io');
 
-      io.emit(EVENTS.ROOM_LIST_UPDATE, roomService.getRooms());
+      io.emit(EVENTS.ROOM_LIST, roomService.getRooms());
 
       res.status(201).json(room);
     } catch (error) {

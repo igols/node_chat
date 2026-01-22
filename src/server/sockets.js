@@ -10,6 +10,15 @@ const setupSockets = (server) => {
   });
 
   io.on(EVENTS.CONNECTION, (socket) => {
+    socket.on(EVENTS.ROOM_CREATE, ({ name, owner }) => {
+      try {
+        roomService.createRoom({ name, owner });
+        io.emit(EVENTS.ROOM_LIST, roomService.getRooms());
+      } catch (error) {
+        socket.emit(EVENTS.ERROR, error.message);
+      }
+    });
+
     socket.on(EVENTS.ROOM_JOIN, ({ roomId, username }) => {
       try {
         const room = roomService.joinRoom({ roomId, username });
@@ -29,7 +38,7 @@ const setupSockets = (server) => {
       try {
         roomService.renameRoom({ roomId, newName });
 
-        io.emit(EVENTS.ROOM_LIST, roomService.getAllRooms?.() || []);
+        io.emit(EVENTS.ROOM_LIST, roomService.getRooms() || []);
       } catch (error) {
         socket.emit(EVENTS.ERROR, error.message);
       }
@@ -39,7 +48,7 @@ const setupSockets = (server) => {
       try {
         roomService.deleteRoom({ roomId });
 
-        io.emit(EVENTS.ROOM_LIST, roomService.getAllRooms?.() || []);
+        io.emit(EVENTS.ROOM_LIST, roomService.getRooms() || []);
       } catch (error) {
         socket.emit(EVENTS.ERROR, error.message);
       }

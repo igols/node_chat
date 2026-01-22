@@ -66,26 +66,6 @@ createRoomBtn.addEventListener('click', () => {
   });
 });
 
-socket.on(EVENTS.ROOM_LIST, (rooms) => {
-  roomsList.innerHTML = '';
-
-  rooms.forEach((room) => {
-    const li = document.createElement('li');
-
-    li.textContent = room.name;
-
-    const btn = document.createElement('button');
-
-    btn.textContent = 'Увійти';
-    btn.style.marginLeft = '10px';
-
-    btn.onclick = () => joinRoom(room.id, room.name);
-
-    li.appendChild(btn);
-    roomsList.appendChild(li);
-  });
-});
-
 function joinRoom(roomId, roomName) {
   const username = usernameInput.value.trim();
 
@@ -133,4 +113,60 @@ socket.on(EVENTS.MSG_NEW, (message) => {
 
 socket.on(EVENTS.ERROR, (msg) => {
   window.alert(msg);
+});
+
+socket.on(EVENTS.ROOM_LIST, (rooms) => {
+  roomsList.innerHTML = '';
+
+  rooms.forEach((room) => {
+    const li = document.createElement('li');
+
+    const title = document.createElement('span');
+
+    title.textContent = room.name;
+
+    const joinBtn = document.createElement('button');
+
+    joinBtn.textContent = 'Увійти';
+    joinBtn.style.marginLeft = '10px';
+    joinBtn.onclick = () => joinRoom(room.id, room.name);
+
+    const renameBtn = document.createElement('button');
+
+    renameBtn.textContent = 'Rename';
+    renameBtn.style.marginLeft = '5px';
+
+    renameBtn.onclick = () => {
+      const newName = window.prompt('Нова назва кімнати', room.name);
+
+      if (newName) {
+        socket.emit(EVENTS.ROOM_RENAME, {
+          roomId: room.id,
+          newName,
+        });
+      }
+    };
+
+    const deleteBtn = document.createElement('button');
+
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.style.marginLeft = '5px';
+
+    deleteBtn.onclick = () => {
+      const confirmed = window.confirm('Видалити кімнату?');
+
+      if (confirmed) {
+        socket.emit(EVENTS.ROOM_DELETE, {
+          roomId: room.id,
+        });
+      }
+    };
+
+    li.appendChild(title);
+    li.appendChild(joinBtn);
+    li.appendChild(renameBtn);
+    li.appendChild(deleteBtn);
+
+    roomsList.appendChild(li);
+  });
 });
